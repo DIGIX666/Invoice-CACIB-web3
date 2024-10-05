@@ -25,6 +25,7 @@ contract InvoiceNFT is ERC1155, Ownable {
 
     event InvoiceCreated(uint256 indexed invoiceId, address indexed creator, uint256 nftId);
     event InvoicePaid(uint256 indexed invoiceId, address indexed creator);
+    event InvoiceUpdated(uint256 indexed invoiceId, address indexed updater);
 
     constructor() 
         ERC1155("https://api.example.com/metadata/{id}.json") 
@@ -32,15 +33,17 @@ contract InvoiceNFT is ERC1155, Ownable {
     {}
 
     function createInvoice(
-        string memory _issuer,
-        string memory _recipient,
-        string memory _description,
-        uint256 _amount,
-        string memory _currency,
-        uint256 _dueDate,
-        string memory _paymentInfo
-    ) public {
+    string memory _issuer,
+    string memory _recipient,
+    string memory _description,
+    uint256 _amount,
+    string memory _currency,
+    uint256 _dueDate,
+    string memory _paymentInfo,
+    address[] memory _destinataires
+) public {
         uint256 invoiceId = currentInvoiceId;
+        
         invoices[invoiceId] = Invoice({
             id: invoiceId,
             issuer: _issuer,
@@ -55,9 +58,17 @@ contract InvoiceNFT is ERC1155, Ownable {
         });
 
         invoiceCreators[invoiceId] = msg.sender;
-        _mint(msg.sender, invoiceId, 2, "");
-        currentInvoiceId++;
+        
+        // Mint pour le créateur
+        _mint(msg.sender, invoiceId, 1, "");
 
+        // Mint pour les destinataires supplémentaires
+    for (uint256 i = 0; i < _destinataires.length; i++) {
+        if (_destinataires[i] != msg.sender) {
+            _mint(_destinataires[i], invoiceId, 1, "");
+        }
+    }
+        currentInvoiceId++;
         emit InvoiceCreated(invoiceId, msg.sender, invoiceId);
     }
 
@@ -69,11 +80,11 @@ contract InvoiceNFT is ERC1155, Ownable {
         emit InvoicePaid(_invoiceId, msg.sender);
     }
 
-    function mintMoreCopies(uint256 _invoiceId, uint256 _amount) public {
-        require(msg.sender == invoiceCreators[_invoiceId], "Seul le createur de la facture peut minter plus de copies");
-        _mint(msg.sender, _invoiceId, _amount, "");
-    }
-
+    
+function mintMoreCopies(uint256 _invoiceId, uint256 _amount) public {
+    require(msg.sender == invoiceCreators[_invoiceId], "Seul le createur de la facture peut minter plus de copies");
+    _mint(msg.sender, _invoiceId, _amount, "");
+}
     function getInvoiceDetails(uint256 _invoiceId) public view returns (Invoice memory) {
         return invoices[_invoiceId];
     }
