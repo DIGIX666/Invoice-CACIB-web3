@@ -1,18 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
-contract InvoiceNFT is ERC1155 {
-    uint256 public currentInvoiceId = 1;
-
-    enum InvoiceStatus { Emis, Paye }
+contract InvoiceNFT is ERC721 {
+    uint256 private lastTimestamp;
 
     struct Invoice {
         uint256 id;
+        address client;
+        address creator;
         string issuer;
-        string recipient;
         string description;
         uint256 amount;
         string currency;
@@ -20,113 +18,78 @@ contract InvoiceNFT is ERC1155 {
         uint256 dueDate;
         string paymentInfo;
         uint256 issueDate;
-        address soCashAccount;
     }
 
-    mapping(uint256 => Invoice) public invoices;
-    mapping(uint256 => address) public invoiceCreators;
+    enum InvoiceStatus { Emis, Paye }
 
-    event InvoiceCreated(uint256 indexed invoiceId, address indexed creator, uint256 nftId);
-    event InvoicePaid(uint256 indexed invoiceId, address indexed creator, address indexed payer, uint256 amount);
-    event InvoiceUpdated(uint256 indexed invoiceId, address indexed updater);
+    mapping(uint256 => Invoice) private invoices;
 
-    constructor() 
-        ERC1155("https://api.example.com/metadata/{id}.json")
-    {}
+    event InvoiceCreated(uint256 indexed invoiceId, address indexed client, address indexed creator);
+    event InvoicePaid(uint256 indexed invoiceId, address indexed client);
+
+    constructor() ERC721("InvoiceNFT", "INVNFT") {
+        lastTimestamp = block.timestamp;
+    }
+
+    function generateUniqueId() private returns (uint256) {
+        uint256 currentTimestamp = block.timestamp;
+        if (currentTimestamp <= lastTimestamp) {
+            currentTimestamp = lastTimestamp + 1;
+        }
+        lastTimestamp = currentTimestamp;
+        return currentTimestamp;
+    }
 
     function createInvoice(
-    string memory _issuer,
-    string memory _recipient,
-    string memory _description,
-    uint256 _amount,
-    string memory _currency,
-    uint256 _dueDate,
-    string memory _paymentInfo,
-    address[] memory _destinataires
-) public {
-        uint256 invoiceId = currentInvoiceId;
+        address _client,
+        string memory _issuer,
+        string memory _description,
+        uint256 _amount,
+        string memory _currency,
+        uint256 _dueDate,
+        string memory _paymentInfo
+    ) public returns (uint256) {
+        uint256 invoiceId = generateUniqueId();
         
         invoices[invoiceId] = Invoice({
             id: invoiceId,
+            client: _client,
+            creator: msg.sender,
             issuer: _issuer,
-            recipient: _recipient,
             description: _description,
             amount: _amount,
             currency: _currency,
             status: InvoiceStatus.Emis,
             dueDate: _dueDate,
             paymentInfo: _paymentInfo,
-            issueDate: block.timestamp,
-            soCashAccount: address(0)
+            issueDate: block.timestamp
         });
 
-        invoiceCreators[invoiceId] = msg.sender;
+        _safeMint(_client, invoiceId);
         
-        // Mint pour le créateur
-        _mint(msg.sender, invoiceId, 1, "");
-
-        // Mint pour les destinataires supplémentaires
-    for (uint256 i = 0; i < _destinataires.length; i++) {
-        if (_destinataires[i] != msg.sender) {
-            _mint(_destinataires[i], invoiceId, 1, "");
-        }
-    }
-        currentInvoiceId++;
-        emit InvoiceCreated(invoiceId, msg.sender, invoiceId);
+        emit InvoiceCreated(invoiceId, _client, msg.sender);
+        return invoiceId;
     }
 
     function markAsPaid(uint256 _invoiceId) public {
-        require(msg.sender == invoiceCreators[_invoiceId], "Seul le createur de la facture peut la marquer comme payee");
+        require(msg.sender == invoices[_invoiceId].creator, "Seul le createur de la facture peut la marquer comme payee");
         require(invoices[_invoiceId].status != InvoiceStatus.Paye, "La facture est deja payee.");
         invoices[_invoiceId].status = InvoiceStatus.Paye;
-        emit InvoicePaid(_invoiceId, msg.sender, msg.sender, invoices[_invoiceId].amount);
+        emit InvoicePaid(_invoiceId, invoices[_invoiceId].client);
     }
 
-    
-function mintMoreCopies(uint256 _invoiceId, uint256 _amount) public {
-    require(msg.sender == invoiceCreators[_invoiceId], "Seul le createur de la facture peut minter plus de copies");
-    _mint(msg.sender, _invoiceId, _amount, "");
-}
     function getInvoiceDetails(uint256 _invoiceId) public view returns (Invoice memory) {
+        require(_exists(_invoiceId), "Le NFT de cette facture n'existe pas");
+        require(msg.sender == ownerOf(_invoiceId) || msg.sender == invoices[_invoiceId].creator, "Vous n'etes pas autorise a voir les details de cette facture");
         return invoices[_invoiceId];
     }
-    function setSoCashAccount(uint256 _invoiceId, address _soCashAccount) public {
-    require(msg.sender == invoiceCreators[_invoiceId], unicode"Seul le createur de la facture peut définir le compte so|cash");
-    invoices[_invoiceId].soCashAccount = _soCashAccount;
-}
 
-}
-
-
-interface ISoCash {
-    function transfer(address recipient, uint256 amount) external;
-}
-
-contract InvoicePayment {
-    address public invoiceNFTContract;
-    uint256 public invoiceId;
-    address public soCashAccountPayer;
-    address public soCashAccountProvider;
-
-    constructor(address _invoiceNFTContract, uint256 _invoiceId, address _soCashAccountProvider) {
-        invoiceNFTContract = _invoiceNFTContract;
-        invoiceId = _invoiceId;
-        soCashAccountProvider = _soCashAccountProvider;
+    function isInvoiceCreator(uint256 _invoiceId, address _address) public view returns (bool) {
+        return invoices[_invoiceId].creator == _address;
     }
 
-    function setPayerAccount(address _soCashAccountPayer) external {
-        soCashAccountPayer = _soCashAccountPayer;
+    function getInvoiceStatus(uint256 _invoiceId) public view returns (InvoiceStatus) {
+        require(_exists(_invoiceId), "Le NFT de cette facture n'existe pas");
+        return invoices[_invoiceId].status;
     }
-
-    function payInvoice() external {
-    require(soCashAccountPayer != address(0), unicode"Le compte du payeur so|cash n'est pas défini.");
-    require(soCashAccountProvider != address(0), unicode"Le compte du fournisseur so|cash n'est pas défini.");
-
-    // Appel au contrat so|cash pour effectuer le transfert
-    ISoCash(soCashAccountPayer).transfer(soCashAccountProvider, invoiceId);
-    
-    // Marquer la facture comme payée
-    InvoiceNFT(invoiceNFTContract).markAsPaid(invoiceId);
-}
-
 }
