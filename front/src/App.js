@@ -74,6 +74,41 @@ function App() {
       alert("Erreur lors de la création de la facture: " + error.message);
     }
   };
+
+  const getInvoiceDetails = async (id) => {
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const contract = new ethers.Contract(
+        contractAddress,
+        InvoiceNFT.abi,
+        provider
+      );
+
+      const invoice = await contract.getInvoiceDetails(id);
+      setDetails(invoice);
+    } catch (error) {
+      console.error(
+        "Erreur lors de la récupération des détails de la facture:",
+        error
+      );
+    }
+  };
+
+  const payInvoiceWithSoCash = async (invoiceId, payerSoCashAccount) => {
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(contractAddress, InvoiceNFT.abi, signer);
+      
+      const tx = await contract.payInvoice(invoiceId, payerSoCashAccount);
+      await tx.wait();
+      console.log('Invoice paid successfully');
+    } catch (error) {
+      console.error('Error paying invoice:', error);
+    }
+  };
+  
+
   return (
     <div>
       <h1>Gestion des Factures NFT</h1>
@@ -159,7 +194,7 @@ function App() {
         <button type="submit">Créer la Facture</button>
       </form>
     </div>
-  );
+    );
 }
 
 export default App;
