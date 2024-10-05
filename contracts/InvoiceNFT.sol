@@ -24,7 +24,7 @@ contract InvoiceNFT is ERC721 {
 
     mapping(uint256 => Invoice) private invoices;
 
-    event InvoiceCreated(uint256 indexed invoiceId, address indexed client, address indexed creator);
+    event InvoiceCreated(uint256 indexed invoiceId, address indexed client, address indexed creator, uint256 amount, uint256 dueDate);
     event InvoicePaid(uint256 indexed invoiceId, address indexed client);
 
     constructor() ERC721("InvoiceNFT", "INVNFT") {
@@ -67,7 +67,7 @@ contract InvoiceNFT is ERC721 {
 
         _safeMint(_client, invoiceId);
         
-        emit InvoiceCreated(invoiceId, _client, msg.sender);
+        emit InvoiceCreated(invoiceId, _client, msg.sender, _amount, _dueDate);
         return invoiceId;
     }
 
@@ -91,5 +91,9 @@ contract InvoiceNFT is ERC721 {
     function getInvoiceStatus(uint256 _invoiceId) public view returns (InvoiceStatus) {
         require(_exists(_invoiceId), "Le NFT de cette facture n'existe pas");
         return invoices[_invoiceId].status;
+    }
+
+    function _exists(uint256 tokenId) internal view returns (bool) {
+        return _ownerOf(tokenId) != address(0);
     }
 }
