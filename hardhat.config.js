@@ -1,11 +1,12 @@
 require("@nomiclabs/hardhat-waffle");
+require("dotenv").config();
 
 module.exports = {
-  solidity: "0.8.20",
+  solidity: "0.8.27",
   networks: {
     fuji: {
       url: `https://api.avax-test.network/ext/bc/C/rpc`,
-      accounts: [''], // Remplacez par votre clé privée
+      accounts: [process.env.PRIVATE_KEY], // Remplacez par votre clé privée
     },
     // mainnet: {
     //   url: `https://api.avax.network/ext/bc/C/rpc`,

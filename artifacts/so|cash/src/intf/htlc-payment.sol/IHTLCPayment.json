@@ -1,0 +1,264 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "IHTLCPayment",
+  "sourceName": "so|cash/src/intf/htlc-payment.sol",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "id",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "hashlockPaid",
+          "type": "bytes32"
+        },
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "internalType": "contract ISoCashAccount",
+                  "name": "account",
+                  "type": "address"
+                },
+                {
+                  "internalType": "BIC",
+                  "name": "bic",
+                  "type": "bytes11"
+                },
+                {
+                  "internalType": "IBAN",
+                  "name": "iban",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct RecipentInfo",
+              "name": "recipient",
+              "type": "tuple"
+            },
+            {
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "deadline",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "hashlockPaid",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "hashlockCancel",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "string",
+              "name": "opaque",
+              "type": "string"
+            },
+            {
+              "internalType": "enum IHTLCPayment.HTLCState",
+              "name": "state",
+              "type": "uint8"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct IHTLCPayment.HTLC",
+          "name": "htlc",
+          "type": "tuple"
+        }
+      ],
+      "name": "HTLCPaymentCreated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "id",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "deadline",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "usingSecret",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "opaque",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "cancelled",
+          "type": "bool"
+        }
+      ],
+      "name": "HTLCPaymentRemoved",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "id",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getHTLCPayment",
+      "outputs": [
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "internalType": "contract ISoCashAccount",
+                  "name": "account",
+                  "type": "address"
+                },
+                {
+                  "internalType": "BIC",
+                  "name": "bic",
+                  "type": "bytes11"
+                },
+                {
+                  "internalType": "IBAN",
+                  "name": "iban",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct RecipentInfo",
+              "name": "recipient",
+              "type": "tuple"
+            },
+            {
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "deadline",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "hashlockPaid",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "hashlockCancel",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "string",
+              "name": "opaque",
+              "type": "string"
+            },
+            {
+              "internalType": "enum IHTLCPayment.HTLCState",
+              "name": "state",
+              "type": "uint8"
+            }
+          ],
+          "internalType": "struct IHTLCPayment.HTLC",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "id",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "string",
+          "name": "secret",
+          "type": "string"
+        }
+      ],
+      "name": "verifyHTLC",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "ok",
+          "type": "bool"
+        },
+        {
+          "internalType": "string",
+          "name": "reason",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "id",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "string",
+          "name": "secret",
+          "type": "string"
+        }
+      ],
+      "name": "verifyHTLCCancel",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "ok",
+          "type": "bool"
+        },
+        {
+          "internalType": "string",
+          "name": "reason",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

@@ -20,7 +20,7 @@ struct AccountData {
   ISoCashBank loroOf; // can remain zero if not for a bank
 }
 
-contract SoCashBank is ISoCashBank, ISoCashBankBackOffice, ISoCashBankExternal, ISoCashInterBank, Controls, WhitelistedSenders {
+abstract contract SoCashBank is ISoCashBank, ISoCashBankBackOffice, ISoCashBankExternal, ISoCashInterBank, Controls, WhitelistedSenders {
   //#region STORAGE VARIABLES
   BIC private _bic;
   BankCode private _bankCode;

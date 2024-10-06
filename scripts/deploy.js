@@ -12,18 +12,12 @@ async function main() {
   const invoiceNFT = await InvoiceNFT.deploy();
   await invoiceNFT.deployed(); // Attente de l'achèvement du déploiement
   console.log("InvoiceNFT contract deployed to:", invoiceNFT.address);
-
-  // Ajout d'une adresse soCashAccountProvider (à ajuster en fonction du contexte)
-  const soCashAccountProvider = "0xYourSoCashAccountProviderAddressHere"; // Remplace par une adresse valide
-
-  // Pour cet exemple, on définit un invoiceId manuellement (à ajuster en fonction du contexte)
-  const invoiceId = 1;
-
-  // Déploiement du contrat InvoicePayment avec les paramètres appropriés
-  const InvoicePayment = await ethers.getContractFactory("InvoicePayment");
-  const invoicePayment = await InvoicePayment.deploy(invoiceNFT.address, invoiceId, soCashAccountProvider);
-  await invoicePayment.deployed(); // Attente de l'achèvement du déploiement
-  console.log("InvoicePayment contract deployed to:", invoicePayment.address);
+  
+  // Deploy the PayInvoice contract
+  const PayInvoice = await ethers.getContractFactory("PaymentWithSoCash");
+  const payInvoice = await PayInvoice.deploy(invoiceNFT.address, '0xE915e34bF6D169bDE3A6DE84ad9D6E1a205Bce4d', '0x7001d5D92c9EbcbFF5c6bE3E9dd855cffb353e00');
+  await payInvoice.deployed(); // Attente de l'achèvement du déploiement
+  console.log("PayInvoice contract deployed to:", payInvoice.address);
 }
 
 main()

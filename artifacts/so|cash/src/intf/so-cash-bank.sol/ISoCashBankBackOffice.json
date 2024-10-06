@@ -1,0 +1,573 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "ISoCashBankBackOffice",
+  "sourceName": "so|cash/src/intf/so-cash-bank.sol",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "contract ISoCashAccount",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "active",
+          "type": "bool"
+        }
+      ],
+      "name": "AccountActivation",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "contract ISoCashAccount",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "registered",
+          "type": "bool"
+        }
+      ],
+      "name": "AccountRegistration",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "contract ISoCashBank",
+          "name": "bank",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "bic",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "currency",
+          "type": "string"
+        }
+      ],
+      "name": "BankCreation",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "contract ISoCashBank",
+          "name": "bank",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "registered",
+          "type": "bool"
+        }
+      ],
+      "name": "BankRegistration",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "TransferId",
+          "name": "id",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "enum TransferStatus",
+          "name": "status",
+          "type": "uint8"
+        }
+      ],
+      "name": "TransfertStateChanged",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract ISoCashBank",
+          "name": "correspondent",
+          "type": "address"
+        }
+      ],
+      "name": "correspondent",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bool",
+              "name": "registered",
+              "type": "bool"
+            },
+            {
+              "internalType": "contract ISoCashAccount",
+              "name": "loro",
+              "type": "address"
+            },
+            {
+              "internalType": "contract ISoCashAccount",
+              "name": "nostro",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "lastNostroBalance",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct CorrespondentBank",
+          "name": "cb",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract ISoCashAccount",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "details",
+          "type": "string"
+        }
+      ],
+      "name": "credit",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract ISoCashAccount",
+          "name": "nostro",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "details",
+          "type": "string"
+        }
+      ],
+      "name": "creditNostro",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract ISoCashAccount",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "details",
+          "type": "string"
+        }
+      ],
+      "name": "debit",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "TransferId",
+          "name": "id",
+          "type": "uint256"
+        },
+        {
+          "internalType": "enum TransferStatus",
+          "name": "status",
+          "type": "uint8"
+        },
+        {
+          "internalType": "string",
+          "name": "reason",
+          "type": "string"
+        }
+      ],
+      "name": "decidePendingTransfer",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract ISoCashAccount",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "isAccountActive",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract ISoCashAccount",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "isAccountRegistered",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract ISoCashBank",
+          "name": "correspondent",
+          "type": "address"
+        }
+      ],
+      "name": "isCorrespondentRegistered",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract ISoCashAccount",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "lockFunds",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract ISoCashAccount",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "registerAccount",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract ISoCashBank",
+          "name": "correspondent",
+          "type": "address"
+        },
+        {
+          "internalType": "contract ISoCashAccount",
+          "name": "loro",
+          "type": "address"
+        },
+        {
+          "internalType": "contract ISoCashAccount",
+          "name": "nostro",
+          "type": "address"
+        }
+      ],
+      "name": "registerCorrespondent",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract ISoCashBank",
+          "name": "correspondent",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "requestNetting",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract ISoCashAccount",
+          "name": "nostro",
+          "type": "address"
+        }
+      ],
+      "name": "synchroNostro",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract ISoCashAccount",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "toggleAccountActive",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract ISoCashAccount",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "components": [
+            {
+              "internalType": "contract ISoCashAccount",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "internalType": "BIC",
+              "name": "bic",
+              "type": "bytes11"
+            },
+            {
+              "internalType": "IBAN",
+              "name": "iban",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct RecipentInfo",
+          "name": "to",
+          "type": "tuple"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "details",
+          "type": "string"
+        }
+      ],
+      "name": "transferFrom",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract ISoCashAccount",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "unlockFunds",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract ISoCashAccount",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "unregisterAccount",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract ISoCashBank",
+          "name": "correspondent",
+          "type": "address"
+        }
+      ],
+      "name": "unregisterCorrespondent",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}
