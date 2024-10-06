@@ -1,8 +1,11 @@
 import React, { useState } from "react";
-import { ethers, isAddress } from "ethers"; // Import d'ethers et des utilitaires nécessaires
-import InvoiceNFT from "./InvoiceNFT.json"; // ABI du contrat
+import { ethers } from "ethers";
+import InvoiceNFT from "./InvoiceNFT.json"; // ABI du contrat InvoiceNFT
+import PaymentWithSoCash from './PaymentWithSoCash.json'; // ABI du contrat PaymentWithSoCash
+import { formatUnits, parseUnits } from "ethers";
 
-const contractAddress = "0xbEA1A08A0A6A061299508D2b01f11959aFC03fcE"; // Remplacez par l'adresse déployée
+const contractAddress = "0x18a74A851A762D21c7DA9E0B0D5f0082b194EF7c"; // Adresse du contrat InvoiceNFT
+const paymentContractAddress = "0xbFe1E6ef16c13DF741a90D238FE130E0077fc746"; // Adresse du contrat PaymentWithSoCash
 
 function App() {
   const [issuer, setIssuer] = useState("");
@@ -12,58 +15,35 @@ function App() {
   const [currency, setCurrency] = useState("ETH");
   const [dueDate, setDueDate] = useState("");
   const [paymentInfo, setPaymentInfo] = useState("");
-  const [destinataires, setDestinataires] = useState("");
+  const [invoiceId, setInvoiceId] = useState("");
+  const [providerAddress, setProviderAddress] = useState(""); // Pour récupérer l'adresse du fournisseur
+  const [invoiceDetails, setInvoiceDetails] = useState(null); // Stocker les détails de la facture
+  const [invoiceURI, setInvoiceURI] = useState(null); // Stocker l'URI de la facture NFT
 
+  // Fonction pour créer une nouvelle facture
   const createInvoice = async (e) => {
     e.preventDefault();
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
-      const contract = new ethers.Contract(
-        contractAddress,
-        InvoiceNFT.abi,
-        signer
-      );
+      const contract = new ethers.Contract(contractAddress, InvoiceNFT.abi, signer);
 
       if (isNaN(amount) || parseFloat(amount) <= 0) {
         alert("Veuillez entrer un montant valide.");
         return;
       }
 
-      const parsedAmount = ethers.parseUnits(amount, "ether");
+      const parsedAmount = parseUnits(amount, "ether");
       const parsedDueDate = Math.floor(new Date(dueDate).getTime() / 1000);
 
-      console.log("Données envoyées au contrat:", {
-        _issuer: issuer,
-        _recipient: recipient,
-        _description: description,
-        _amount: parsedAmount.toString(),
-        _currency: currency,
-        _dueDate: parsedDueDate,
-        _paymentInfo: paymentInfo,
-      });
-
-      const destinatairesArray = destinataires
-        .split(",")
-        .map((addr) => addr.trim());
-
-      // Vérifiez que toutes les adresses sont valides
-      if (!destinatairesArray.every((addr) => isAddress(addr))) {
-        alert(
-          "Une ou plusieurs adresses de destinataires ne sont pas valides."
-        );
-        return;
-      }
-
       const tx = await contract.createInvoice(
-        issuer,
         recipient,
+        issuer,
         description,
         parsedAmount,
         currency,
         parsedDueDate,
-        paymentInfo,
-        destinatairesArray
+        paymentInfo
       );
 
       await tx.wait();
@@ -75,39 +55,63 @@ function App() {
     }
   };
 
-  const getInvoiceDetails = async (id) => {
+  // Fonction pour récupérer les détails d'une facture
+  const getInvoiceDetails = async (e) => {
+    e.preventDefault();
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
-      const contract = new ethers.Contract(
-        contractAddress,
-        InvoiceNFT.abi,
-        provider
-      );
+      const contract = new ethers.Contract(contractAddress, InvoiceNFT.abi, provider);
 
-      const invoice = await contract.getInvoiceDetails(id);
-      setDetails(invoice);
+      const invoice = await contract.getInvoiceDetails(invoiceId);
+      setInvoiceDetails(invoice); // Stocker les détails de la facture
+
+      // Obtenir le token URI du NFT de la facture
+      const uri = await contract.tokenURI(invoiceId);
+      setInvoiceURI(uri); // Stocker l'URI pour les métadonnées
     } catch (error) {
-      console.error(
-        "Erreur lors de la récupération des détails de la facture:",
-        error
-      );
+      console.error("Erreur lors de la récupération des détails de la facture:", error);
     }
   };
 
-  const payInvoiceWithSoCash = async (invoiceId, payerSoCashAccount) => {
+  // Fonction pour marquer une facture comme payée
+  const markAsPaid = async (e) => {
+    e.preventDefault();
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(contractAddress, InvoiceNFT.abi, signer);
-      
-      const tx = await contract.payInvoice(invoiceId, payerSoCashAccount);
+
+      const tx = await contract.markAsPaid(invoiceId);
       await tx.wait();
-      console.log('Invoice paid successfully');
+      console.log('Facture marquée comme payée:', tx);
+      alert("La facture a été marquée comme payée !");
     } catch (error) {
-      console.error('Error paying invoice:', error);
+      console.error('Erreur lors du paiement de la facture:', error);
+      alert("Erreur lors du paiement de la facture: " + error.message);
     }
   };
-  
+
+  const payInvoiceWithSoCash = async (e) => {
+    e.preventDefault();
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const paymentContract = new ethers.Contract(paymentContractAddress, PaymentWithSoCash.abi, signer);
+      
+      // Conversion du montant en wei
+      const parsedAmount = parseUnits(amount, "ether");
+
+      // Appel de la fonction payInvoice
+      const tx = await paymentContract.payInvoice(invoiceId, parsedAmount, currency);
+      await tx.wait();
+
+      console.log("Paiement effectué et facture marquée comme payée:", tx);
+      alert("Paiement effectué et facture marquée comme payée !");
+    } catch (error) {
+      console.error("Erreur lors du paiement:", error);
+      alert("Erreur lors du paiement: " + error.message);
+    }
+  };
 
   return (
     <div>
@@ -154,13 +158,15 @@ function App() {
         </div>
         <div>
           <label>Devise:</label>
-          <input
-            type="text"
+          <select
             value={currency}
             onChange={(e) => setCurrency(e.target.value)}
             required
-            disabled
-          />
+          >
+            <option value="ETH">ETH</option>
+            <option value="USDC">USDC</option>
+            <option value="DAI">DAI</option>
+          </select>
         </div>
         <div>
           <label>Date d'échéance:</label>
@@ -180,21 +186,96 @@ function App() {
             required
           />
         </div>
+        <button type="submit">Créer la Facture</button>
+      </form>
+
+      {/* Formulaire pour récupérer les détails d'une facture */}
+      <form onSubmit={getInvoiceDetails}>
+        <h2>Récupérer les détails d'une facture</h2>
         <div>
-          <label>
-            Adresses des destinataires (séparées par des virgules si plusieurs):
-          </label>
+          <label>ID de la facture:</label>
           <input
             type="text"
-            value={destinataires}
-            onChange={(e) => setDestinataires(e.target.value)}
+            value={invoiceId}
+            onChange={(e) => setInvoiceId(e.target.value)}
             required
           />
         </div>
-        <button type="submit">Créer la Facture</button>
+        <div>
+          <label>Adresse du fournisseur:</label>
+          <input
+            type="text"
+            value={providerAddress}
+            onChange={(e) => setProviderAddress(e.target.value)}
+            required
+          />
+        </div>
+        <button type="submit">Obtenir les détails</button>
+      </form>
+
+      {invoiceDetails && (
+        <div>
+        <h2>Détails de la facture</h2>
+        <p>ID: {invoiceDetails.id}</p>
+        <p>Émetteur: {invoiceDetails.issuer}</p>
+        <p>Client: {invoiceDetails.client}</p>
+        <p>Description: {invoiceDetails.description}</p>
+        <p>Montant:{invoiceDetails.amount}</p>
+        <p>Date d'émission: {new Date(invoiceDetails.issueDate * 1000).toLocaleString()}</p>
+        <p>Date d'échéance: {new Date(invoiceDetails.dueDate * 1000).toLocaleString()}</p>
+        <p>Statut: {invoiceDetails.status === 0 ? 'Émis' : 'Payé'}</p>
+      </div>
+      )}
+
+      {invoiceURI && (
+        <div>
+          <h2>URI du NFT de la facture</h2>
+          <a href={invoiceURI} target="_blank" rel="noopener noreferrer">
+            Voir les métadonnées du NFT
+          </a>
+        </div>
+      )}
+
+      {/* Formulaire pour marquer une facture comme payée */}
+      <form onSubmit={markAsPaid}>
+        <h2>Marquer une facture comme payée</h2>
+        <div>
+          <label>ID de la facture à payer:</label>
+          <input
+            type="text"
+            value={invoiceId}
+            onChange={(e) => setInvoiceId(e.target.value)}
+            required
+          />
+        </div>
+        <button type="submit">Marquer comme payée</button>
+      </form>
+
+      {/* Formulaire pour payer une facture via so|cash */}
+      <form onSubmit={payInvoiceWithSoCash}>
+        <h2>Payer une facture via so|cash</h2>
+        <div>
+          <label>ID de la facture à payer:</label>
+          <input
+            type="text"
+            value={invoiceId}
+            onChange={(e) => setInvoiceId(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Montant (en ETH):</label>
+          <input
+            type="number"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            required
+          />
+        </div>
+        <button type="submit">Payer via so|cash</button>
       </form>
     </div>
-    );
+  );
 }
 
 export default App;

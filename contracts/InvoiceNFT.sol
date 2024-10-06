@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.27;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/utils/Base64.sol";
 
-contract InvoiceNFT is ERC721 {
-    uint256 private lastTimestamp;
+contract InvoiceNFT is ERC721URIStorage {
+    uint256 private _nextTokenId;
 
     struct Invoice {
         uint256 id;
@@ -28,16 +29,7 @@ contract InvoiceNFT is ERC721 {
     event InvoicePaid(uint256 indexed invoiceId, address indexed client);
 
     constructor() ERC721("InvoiceNFT", "INVNFT") {
-        lastTimestamp = block.timestamp;
-    }
-
-    function generateUniqueId() private returns (uint256) {
-        uint256 currentTimestamp = block.timestamp;
-        if (currentTimestamp <= lastTimestamp) {
-            currentTimestamp = lastTimestamp + 1;
-        }
-        lastTimestamp = currentTimestamp;
-        return currentTimestamp;
+        _nextTokenId = 1;
     }
 
     function createInvoice(
@@ -49,10 +41,11 @@ contract InvoiceNFT is ERC721 {
         uint256 _dueDate,
         string memory _paymentInfo
     ) public returns (uint256) {
-        uint256 invoiceId = generateUniqueId();
-        
-        invoices[invoiceId] = Invoice({
-            id: invoiceId,
+        uint256 newItemId = _nextTokenId;
+        _nextTokenId++;
+
+        invoices[newItemId] = Invoice({
+            id: newItemId,
             client: _client,
             creator: msg.sender,
             issuer: _issuer,
@@ -65,10 +58,34 @@ contract InvoiceNFT is ERC721 {
             issueDate: block.timestamp
         });
 
-        _safeMint(_client, invoiceId);
+        _safeMint(_client, newItemId);
         
-        emit InvoiceCreated(invoiceId, _client, msg.sender, _amount, _dueDate);
-        return invoiceId;
+        string memory json = Base64.encode(
+            bytes(
+                string(
+                    abi.encodePacked(
+                        '{"name": "Facture #',
+                        Strings.toString(newItemId),
+                        '", "description": "',
+                        _description,
+                        '", "attributes": [{"trait_type": "Montant", "value": "',
+                        Strings.toString(_amount),
+                        ' ',
+                        _currency,
+                        '"}, {"trait_type": "Statut", "value": "Emis"}]}'
+                    )
+                )
+            )
+        );
+
+        string memory finalTokenUri = string(
+            abi.encodePacked("data:application/json;base64,", json)
+        );
+
+        _setTokenURI(newItemId, finalTokenUri);
+
+        emit InvoiceCreated(newItemId, _client, msg.sender, _amount, _dueDate);
+        return newItemId;
     }
 
     function markAsPaid(uint256 _invoiceId) public {
@@ -77,12 +94,18 @@ contract InvoiceNFT is ERC721 {
         invoices[_invoiceId].status = InvoiceStatus.Paye;
         emit InvoicePaid(_invoiceId, invoices[_invoiceId].client);
     }
+// TODO: FIX this
+//    function getInvoiceDetails(uint256 _invoiceId, address _provider) public view returns (Invoice memory) {
+//     require(_exists(_invoiceId), "Le NFT de cette facture n'existe pas");
+    
+//     require(
+//         isInvoiceCreator(_invoiceId, msg.sender) || msg.sender == _provider,
+//         "Vous n'etes pas autorise a voir les details de cette facture"
+//     );
 
-    function getInvoiceDetails(uint256 _invoiceId) public view returns (Invoice memory) {
-        require(_exists(_invoiceId), "Le NFT de cette facture n'existe pas");
-        require(msg.sender == ownerOf(_invoiceId) || msg.sender == invoices[_invoiceId].creator, "Vous n'etes pas autorise a voir les details de cette facture");
-        return invoices[_invoiceId];
-    }
+//     return invoices[_invoiceId];
+// }
+
 
     function isInvoiceCreator(uint256 _invoiceId, address _address) public view returns (bool) {
         return invoices[_invoiceId].creator == _address;

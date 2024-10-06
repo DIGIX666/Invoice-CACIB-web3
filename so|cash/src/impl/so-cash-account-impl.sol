@@ -8,7 +8,7 @@ import "../intf/so-cash-account.sol";
 import "../utilities/whitelisted-senders.sol";
 import "../utilities/htlc-payments.sol";
 
-contract SoCashAccount is ISoCashAccount, ISoCashOwnedAccount, WhitelistedSenders, HTLCPaymentCapacity {
+abstract contract SoCashAccount is ISoCashAccount, ISoCashOwnedAccount, WhitelistedSenders, HTLCPaymentCapacity {
   mapping(bytes32 => bytes) private _attributesStr;
   mapping(bytes32 => bytes32) private _attributesNum;
   mapping(address => uint256) private _allowances; // allowance of external address to transfer from this bank account only
