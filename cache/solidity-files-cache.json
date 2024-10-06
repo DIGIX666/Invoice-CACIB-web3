@@ -1116,8 +1116,8 @@
       "artifacts": []
     },
     "/Users/theodub/Desktop/Hackathon-Blockchain/Invoice-CA-web3/contracts/InvoiceNFT.sol": {
-      "lastModificationDate": 1728211434319,
-      "contentHash": "55ff6946d7c7a67a3244ea1f094dbd4d",
+      "lastModificationDate": 1728215196754,
+      "contentHash": "0a8adee45e8ab7df1c85487b00d30f95",
       "sourceName": "contracts/InvoiceNFT.sol",
       "solcConfig": {
         "version": "0.8.27",
@@ -1155,7 +1155,7 @@
       ]
     },
     "/Users/theodub/Desktop/Hackathon-Blockchain/Invoice-CA-web3/contracts/PayInvoice.sol": {
-      "lastModificationDate": 1728203288526,
+      "lastModificationDate": 1728212446355,
       "contentHash": "6cf73c4981c3ec48b46aca3c04fa206e",
       "sourceName": "contracts/PayInvoice.sol",
       "solcConfig": {

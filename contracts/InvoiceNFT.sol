@@ -94,18 +94,14 @@ contract InvoiceNFT is ERC721URIStorage {
         invoices[_invoiceId].status = InvoiceStatus.Paye;
         emit InvoicePaid(_invoiceId, invoices[_invoiceId].client);
     }
-// TODO: FIX this
-//    function getInvoiceDetails(uint256 _invoiceId, address _provider) public view returns (Invoice memory) {
-//     require(_exists(_invoiceId), "Le NFT de cette facture n'existe pas");
-    
-//     require(
-//         isInvoiceCreator(_invoiceId, msg.sender) || msg.sender == _provider,
-//         "Vous n'etes pas autorise a voir les details de cette facture"
-//     );
+    // TODO: FIX this for use isInvoiceCreator and provider address
+    function getInvoiceDetails(uint256 _invoiceId) public view returns (Invoice memory) {
+        require(_exists(_invoiceId), "Le NFT de cette facture n'existe pas");
 
-//     return invoices[_invoiceId];
-// }
+        // require(isInvoiceCreator(_invoiceId, msg.sender), "Vous n'etes pas autorise a voir les details de cette facture");
 
+        return invoices[_invoiceId];
+    }
 
     function isInvoiceCreator(uint256 _invoiceId, address _address) public view returns (bool) {
         return invoices[_invoiceId].creator == _address;

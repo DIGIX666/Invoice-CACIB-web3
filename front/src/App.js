@@ -4,8 +4,8 @@ import InvoiceNFT from "./InvoiceNFT.json"; // ABI du contrat InvoiceNFT
 import PaymentWithSoCash from './PaymentWithSoCash.json'; // ABI du contrat PaymentWithSoCash
 import { formatUnits, parseUnits } from "ethers";
 
-const contractAddress = "0x18a74A851A762D21c7DA9E0B0D5f0082b194EF7c"; // Adresse du contrat InvoiceNFT
-const paymentContractAddress = "0xbFe1E6ef16c13DF741a90D238FE130E0077fc746"; // Adresse du contrat PaymentWithSoCash
+const contractAddress = "0x125D9dFDCA4100B8a3C3Fe8E5F87f6Ca4Df1B0Ec"; // Adresse du contrat InvoiceNFT
+const paymentContractAddress = "0x0e2c5edb1C3c9bE62633f8e6DEe7Cf7875dCD3cd"; // Adresse du contrat PaymentWithSoCash
 
 function App() {
   const [issuer, setIssuer] = useState("");
@@ -16,9 +16,8 @@ function App() {
   const [dueDate, setDueDate] = useState("");
   const [paymentInfo, setPaymentInfo] = useState("");
   const [invoiceId, setInvoiceId] = useState("");
-  const [providerAddress, setProviderAddress] = useState(""); // Pour récupérer l'adresse du fournisseur
-  const [invoiceDetails, setInvoiceDetails] = useState(null); // Stocker les détails de la facture
-  const [invoiceURI, setInvoiceURI] = useState(null); // Stocker l'URI de la facture NFT
+  const [invoiceDetails, setInvoiceDetails] = useState(null); 
+  const [invoiceURI, setInvoiceURI] = useState(null);
 
   // Fonction pour créer une nouvelle facture
   const createInvoice = async (e) => {
@@ -201,29 +200,20 @@ function App() {
             required
           />
         </div>
-        <div>
-          <label>Adresse du fournisseur:</label>
-          <input
-            type="text"
-            value={providerAddress}
-            onChange={(e) => setProviderAddress(e.target.value)}
-            required
-          />
-        </div>
         <button type="submit">Obtenir les détails</button>
       </form>
 
       {invoiceDetails && (
         <div>
-        <h2>Détails de la facture</h2>
-        <p>ID: {invoiceDetails.id}</p>
-        <p>Émetteur: {invoiceDetails.issuer}</p>
-        <p>Client: {invoiceDetails.client}</p>
-        <p>Description: {invoiceDetails.description}</p>
-        <p>Montant:{invoiceDetails.amount}</p>
-        <p>Date d'émission: {new Date(invoiceDetails.issueDate * 1000).toLocaleString()}</p>
-        <p>Date d'échéance: {new Date(invoiceDetails.dueDate * 1000).toLocaleString()}</p>
-        <p>Statut: {invoiceDetails.status === 0 ? 'Émis' : 'Payé'}</p>
+          <h2>Détails de la facture</h2>
+          <p>ID: {invoiceDetails.id.toString()}</p>
+          <p>Émetteur: {invoiceDetails.issuer}</p>
+          <p>Client: {invoiceDetails.client}</p>
+          <p>Description: {invoiceDetails.description}</p>
+          <p>Montant: {formatUnits(invoiceDetails.amount.toString(), 'ether')} {invoiceDetails.currency}</p>
+          <p>Date d'émission: {new Date(Number(invoiceDetails.issueDate) * 1000).toLocaleString()}</p>
+          <p>Date d'échéance: {new Date(Number(invoiceDetails.dueDate) * 1000).toLocaleString()}</p>
+          <p>Statut: {invoiceDetails.status === 0 ? 'Émis' : 'Payé'}</p>
       </div>
       )}
 
