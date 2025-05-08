@@ -76,7 +76,7 @@ Once the contract is deployed, the contract address will be displayed. Note this
 https://testnet.snowtrace.io/
 
 ## DEMO
-<video controls src="Demo Video.mov" title="Title"></video>
+https://drive.google.com/file/d/1bBrSOQBDPl_VfJQD9pJSvYKZhf21tMlv/view?usp=sharing
 
 ## License
 
