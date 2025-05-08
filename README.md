@@ -75,6 +75,9 @@ Once the contract is deployed, the contract address will be displayed. Note this
 
 https://testnet.snowtrace.io/
 
+## DEMO
+<video controls src="Demo Video.mov" title="Title"></video>
+
 ## License
 
 This project is licensed under the **MIT License** - see the [LICENSE](./LICENSE) file for details.
