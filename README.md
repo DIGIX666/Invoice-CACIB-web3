@@ -1,5 +1,6 @@
 # CleanCash - Payment System with Blockchain Integration
 
+*🏆 2nd price of [Blockchain Hackathon Vierzon](https://www.sia-partners.com/fr/publications/publications-de-nos-experts/hackathon-blockchain-vierzon) -> uses cases CACIB*
 
 ## Overview
 
